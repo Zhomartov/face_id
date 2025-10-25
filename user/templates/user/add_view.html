@@ -1,0 +1,72 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8">
+    <title>University</title>
+    <link rel = 'stylesheet' href="{% static 'user/style.css' %}"/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  </head>
+  <body>
+    <div class='section'>
+      <div class='title'>
+        <span class="material-symbols-outlined">ar_on_you</span>
+        <h1>Добавить объект </h1>
+      </div>
+      <div class='form-body'>
+  <select id="form-select" class="form-select">
+    <option value="">Выберите тип</option>
+    <option value="student">Студент</option>
+    <option value="teacher">Преподаватель</option>
+    <option value="group">Группа</option>
+  </select>
+  <form id="student-form" method="post" class='form'>
+    {% csrf_token %}
+    <input type="hidden" name="form_type" value="student">
+    {{ student_form.as_p }}
+    <button type="submit" class="btn">Сохранить студента</button>
+  </form>
+  <form id="teacher-form" method="post" class='form'>
+    {% csrf_token %}
+    <input type="hidden" name="form_type" value="teacher">
+    {{ teacher_form.as_p }}
+    <button type="submit" class="btn">Сохранить преподавателя</button>
+  </form>
+
+  <form id="group-form" method="post" class='form'>
+    {% csrf_token %}
+    <input type="hidden" name="form_type" value="group">
+    {{ group_form.as_p }}
+    <button type="submit" class="btn">Сохранить группу</button>
+  </form>
+
+  {% if error %}
+  <div class="alert alert-danger mt-3">{{ error }}</div>
+  {% endif %}
+
+
+
+      </div>
+    </div>
+
+<script>
+const select = document.getElementById("form-select");
+const forms = {
+  student: document.getElementById("student-form"),
+  teacher: document.getElementById("teacher-form"),
+  group: document.getElementById("group-form")
+};
+
+select.addEventListener("change", () => {
+  // скрываем все формы
+  Object.values(forms).forEach(f => f.classList.remove("show"));
+
+  // показываем выбранную
+  const selectedForm = forms[select.value];
+  if (selectedForm) {
+    selectedForm.classList.add("show");
+  }
+});
+  </script>  
+  </body>
+</html>

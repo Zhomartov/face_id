@@ -1,2 +1,38 @@
+{% extends 'user/base.html' %}
+{% block content %}
+<div class='section'>
+      <div class='title'>
+        <span class="material-symbols-outlined">ar_on_you</span>
+        <h1>Добро пожаловать !</h1>
+      </div>
+      <img src="{% url 'video' %}" width="640" height="480" id="camera-feed">
+</div>
+{% endblock %}
 
+{% block script %}
+<script>
+async function checkRecognition() {
+  try {
+    const response = await fetch("{% url 'check' %}", { cache: "no-store" });
+    if (!response.ok) {
+      console.warn("check returned", response.status);
+      return;
+    }
 
+    const data = await response.json();
+    if (data.found) {
+      // через 1 секунду делаем редирект на страницу class
+      setTimeout(() => {
+        window.location.href = "{% url 'class' %}";
+      }, 2000);
+    }
+  } catch (err) {
+    console.error("Ошибка при обращении к /check:", err);
+  }
+}
+
+// проверяем каждые 2 секунды
+setInterval(checkRecognition, 2000);
+  
+</script>
+{% endblock %}

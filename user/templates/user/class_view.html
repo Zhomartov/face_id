@@ -1,26 +1,35 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="ru">
-  <head>
-    <meta charset="UTF-8">
-    <title>University</title>
-    <link rel = 'stylesheet' href="{% static 'user/style.css' %}"/>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-  </head>
-  <body>
-    <div class='section'>
+{% extends 'user/base.html' %}
+{% block content%}    
+<div class='section'>
       <div class='title'>
-        <span class="material-symbols-outlined">ar_on_you</span>
+        <span class="material-symbols-outlined">graph_5</span>
         <h1>{{user.group}}</h1>
       </div>
-      <h2>{{user.first_name}}</h2>
-      <h2>{{user.last_name}}</h2>
-      <h2>{{user.father_name}}</h2>
+      <div class='class'>
+        <div class='class-item'>
+          <h2>ФИО :</h2>
+          <h2>{{user.last_name}}</h2>
+          <h2>{{user.first_name}}</h2>
+          <h2>{{user.father_name}}</h2>
+      </div>
+      <div class='class-item'>
+        {% if user.course %}
+        <h2>Курс :</h2>
+        <h2>{{user.course}}</h2>
+        {% endif%}
+        {% if user.major %}
+        <h2>Специальность :</h2>
+        <h2>{{user.major}}</h2>
+        {% endif %}
+      </div>
+      <div>
     </div>
+{% endblock%}
+{% block script %}
     <script>
     setTimeout(() => {
-      window.location.href = "{% url 'home' %}";
-    }, 3000);
+        window.location.href = "{% url 'home' %}";
+      }, 5000);
+
     </script>
-  </body>
-</html>
+{% endblock %}

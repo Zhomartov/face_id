@@ -1,5 +1,5 @@
 from django.views import View
-from django.shortcuts import render
+from django.shortcuts import render , redirect
 import cv2
 import numpy as np
 from django.http import StreamingHttpResponse
@@ -7,7 +7,9 @@ from .models import UserAccounts , Student, Teacher
 import face_recognition
 import dlib
 from django.http import JsonResponse
-from .forms import StudentForm, TeacherForm, GroupForm
+from .forms import StudentForm, TeacherForm, GroupForm , UserForm
+from django.conf import settings
+import os
 
 
 class Home_view(View):
@@ -35,9 +37,9 @@ class Video_stream(View):
         # Инициализация dlib моделей Обязательно изменить под свой
         self.face_detector = dlib.get_frontal_face_detector()
         self.shape_predictor = dlib.shape_predictor(
-            "/home/olzhas/Desktop/project/Face_id/face_recognition_models/face_recognition_models/models/shape_predictor_68_face_landmarks.dat")
+            os.path.join(settings.BASE_DIR, "models/shape_predictor_68_face_landmarks.dat"))
         self.face_rec_model = dlib.face_recognition_model_v1(
-            "/home/olzhas/Desktop/project/Face_id/face_recognition_models/face_recognition_models/models/dlib_face_recognition_resnet_model_v1.dat")
+            os.path.join(settings.BASE_DIR, "models/dlib_face_recognition_resnet_model_v1.dat"))
 
     def generate_frames(self):
         video_capture = cv2.VideoCapture(0)
@@ -135,6 +137,7 @@ class Video_stream(View):
 def check_recognition(request):
     user = Video_stream.last_recognized_user
     if user:
+        Video_stream.last_recognized_user = None
         return JsonResponse({"found": True, "name": user.first_name})
     return JsonResponse({"found": False})
 
@@ -160,8 +163,40 @@ class Add_view(View):
         student_form = StudentForm()
         teacher_form = TeacherForm()
         group_form = GroupForm()
+        user_form = UserForm()
         return render(request, 'user/add_view.html', {
             'student_form': student_form,
             'teacher_form': teacher_form,
-            'group_form': group_form
+            'group_form': group_form,
+            'user_form': user_form
         })
+
+    def post(self, request):
+        form_type = request.POST.get("form_type")
+
+        form_classes = {
+            "student": StudentForm,
+            "teacher": TeacherForm,
+            "group": GroupForm,
+            "user": UserForm,
+        }
+
+        form_class = form_classes.get(form_type)
+        if not form_class:
+            return render(request, 'user/add_view.html', {"error": "Неизвестный тип формы"})
+
+        # Добавляем FILES для user, teacher, student (у них могут быть фото)
+        form = form_class(request.POST, request.FILES)
+
+        if form.is_valid():
+            form.save()
+            return redirect("add")
+        else:
+            return render(request, 'user/add_view.html', {
+                'student_form': StudentForm(),
+                'teacher_form': TeacherForm(),
+                'group_form': GroupForm(),
+                'user_form': UserForm(),
+                'error': "Ошибка при сохранении. Проверьте данные."
+            })
+
